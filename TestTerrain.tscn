@@ -1,7 +1,30 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://tilemaps/Terrain.tres" type="TileSet" id=1]
 [ext_resource path="res://tilemaps/Terrain.gd" type="Script" id=2]
+
+[sub_resource type="Shader" id=3]
+code = "shader_type canvas_item;
+
+uniform float animation_time = 2.0;
+
+void fragment() {
+	// i don't know how to get what texture is processing,
+	// but i know that the right texture for animations is large 224 pixel
+	if (TEXTURE_PIXEL_SIZE.x == 1.0 / 224.0) {
+		float time = fract(TIME / animation_time);
+		float offset = (time < 0.5) ? 0.0 : 0.5;
+		
+		COLOR = texture(TEXTURE, vec2(UV.x + offset , UV.y));
+	}
+	else {
+		COLOR = texture(TEXTURE, UV)
+	}
+}"
+
+[sub_resource type="ShaderMaterial" id=4]
+shader = SubResource( 3 )
+shader_param/animation_time = 2.0
 
 [sub_resource type="OpenSimplexNoise" id=1]
 seed = 3
@@ -14,6 +37,7 @@ noise = SubResource( 1 )
 [node name="Node2D" type="Node2D"]
 
 [node name="Terrain" type="TileMap" parent="."]
+material = SubResource( 4 )
 position = Vector2( -29, -123 )
 tile_set = ExtResource( 1 )
 cell_size = Vector2( 16, 16 )
